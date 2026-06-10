@@ -11,21 +11,29 @@ pipeline {
         }
         stage ("Build image") {
             steps {
-                sh 'docker build -t headphone-app:latest .'
+                sh 'docker build -t timabai/headphone-app:latest .'
             }
         }
-        stage ("Deploy") {
+        stage ("Push") {
+            steps {
+                sh 'docker push timabai/headphone-app:latest'
+            }
+        }
+        stage('Deploy') {
             steps {
                 sh '''
-                docker stop headphone-app || true
-                docker rm headphone-app || true
-
-                docker run -d \\
-                  --name headphone-app \\
-                  -p 8081:80 \\
-                  headphone-app:latest
+                ssh -o StrictHostKeyChecking=no ubuntu@13.221.61.224 "
+                docker pull timabai/headphone-app:latest &&
+                docker stop website || true &&
+                docker rm website || true &&
+                docker run -d \
+                --name website \
+                -p 80:80 \
+                timabai/headphone-app:latest
+                "
                 '''
             }
         }
+         
     }
 }
