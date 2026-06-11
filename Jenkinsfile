@@ -21,7 +21,8 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh '''
+                sshagent(['prod-server-key']) {
+                    sh '''
                 ssh -o StrictHostKeyChecking=no ubuntu@13.221.61.224 "
                 docker pull timabai/headphone-app:latest &&
                 docker stop website || true &&
@@ -32,6 +33,8 @@ pipeline {
                 timabai/headphone-app:latest
                 "
                 '''
+                }
+                
             }
         }
          
